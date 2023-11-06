@@ -1,3 +1,15 @@
+## Project Setup
+
+```sh
+yarn
+```
+
+### Compile and Hot-Reload for Development
+
+```sh
+yarn electron:dev
+```
+
 # emqx-vue3-mqtt-demo
 
 This demo is just for you to learn how to connect to [EMQX Public MQTT Broker](https://www.emqx.com/en/mqtt/public-mqtt5-broker) in Vue 3 using MQTT.js.
@@ -24,21 +36,3 @@ If the standalone TypeScript plugin doesn't feel fast enough to you, Volar has a
 ## Customize configuration
 
 See [Vite Configuration Reference](https://vitejs.dev/config/).
-
-## Project Setup
-
-```sh
-npm install
-```
-
-### Compile and Hot-Reload for Development
-
-```sh
-npm run dev
-```
-
-### Type-Check, Compile and Minify for Production
-
-```sh
-npm run build
-```
