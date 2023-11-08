@@ -1,8 +1,15 @@
 <script setup lang="ts">
 // vue 3 + vite use MQTT.js refer to https://github.com/mqttjs/MQTT.js/issues/1269
 import * as mqtt from "mqtt/dist/mqtt.min";
-import { reactive, ref } from "vue";
-
+import { reactive, ref, toRaw } from "vue";
+const a = {
+  clientId:
+    "hgstGAqF7eN.xiaochengxu|securemode=2,signmethod=hmacsha256,timestamp=1699257190673|",
+  username: "xiaochengxu&hgstGAqF7eN",
+  mqttHostUrl: "iot-06z00cytlnol20h.mqtt.iothub.aliyuncs.com",
+  passwd: "d0bb93f764855209f86259c3c893719ed7d5b6c2c21b00102048cada7c3896ef",
+  port: 1883,
+};
 // https://github.com/mqttjs/MQTT.js#qos
 const qosList = [0, 1, 2];
 
@@ -15,21 +22,34 @@ const qosList = [0, 1, 2];
  */
 const connection = reactive({
   // ws or wss
-  protocol: "ws",
-  host: "broker.emqx.io",
+  protocol: "wss",
+  host: "hgstGAqF7eN.iot-as-mqtt.cn-shanghai.aliyuncs.com",
   // ws -> 8083; wss -> 8084
-  port: 8083,
-  clientId: "emqx_vue3_" + Math.random().toString(16).substring(2, 8),
+  port: 1883,
+
   /**
    * By default, EMQX allows clients to connect without authentication.
    * https://docs.emqx.com/en/enterprise/v4.4/advanced/auth.html#anonymous-login
    */
-  username: "emqx_test",
-  password: "emqx_test",
+
   clean: true,
   connectTimeout: 30 * 1000, // ms
   reconnectPeriod: 4000, // ms
-  // for more options and details, please refer to https://github.com/mqttjs/MQTT.js#mqttclientstreambuilder-options
+  // for more options and details, please refer to https://github.com/mqttjs/MQTT.js#mqttclientstreambuilder-options,
+  wsOptions: {
+    productKey: "hgstGAqF7eN",
+    deviceName: "xiaochengxu",
+    deviceSecret: "85bf87ba1ebb28cabf072ea2812b3765",
+    regionId: "cn-shanghai", //根据自己的区域替换
+    clientId: `hgstGAqF7eN.xiaochengxu|securemode=2,signmethod=hmacsha1,timestamp=${
+      Date.now() + 10000
+    }|`,
+    username: "xiaochengxu&hgstGAqF7eN",
+    password:
+      "d940a1fc3ee3c702b69ae6bb3cb38ed634e8d65c559da1b857e31b19fc450ee3",
+    protocolVersion: 4,
+    keepalive: 60, //60s
+  },
 });
 
 // topic & QoS for MQTT subscribing
@@ -79,20 +99,22 @@ const handleOnReConnect = () => {
 const createConnection = () => {
   try {
     btnLoadingType.value = "connect";
-    const { protocol, host, port, ...options } = connection;
-    const connectUrl = `${protocol}://${host}:${port}/mqtt`;
+    const { protocol, host, port, wsOptions: options } = connection;
+    const connectUrl = `${protocol}://${host}`;
 
     /**
      * if protocol is "ws", connectUrl = "ws://broker.emqx.io:8083/mqtt"
      * if protocol is "wss", connectUrl = "wss://broker.emqx.io:8084/mqtt"
-     * 
+     *
      * /mqtt: MQTT-WebSocket uniformly uses /path as the connection path,
      * which should be specified when connecting, and the path used on EMQX is /mqtt.
-     * 
+     *
      * for more details about "mqtt.connect" method & options,
      * please refer to https://github.com/mqttjs/MQTT.js#mqttconnecturl-options
      */
-    client.value = mqtt.connect(connectUrl, options);
+    console.log(connectUrl, toRaw(options));
+
+    client.value = mqtt.connect(connectUrl, toRaw(options));
 
     if (client.value.on) {
       // https://github.com/mqttjs/MQTT.js#event-connect
@@ -229,17 +251,17 @@ const handleProtocolChange = (value: string) => {
           </el-col>
           <el-col :span="8">
             <el-form-item prop="clientId" label="Client ID">
-              <el-input v-model="connection.clientId"> </el-input>
+              <el-input v-model="connection.wsOptions.clientId"> </el-input>
             </el-form-item>
           </el-col>
           <el-col :span="8">
             <el-form-item prop="username" label="Username">
-              <el-input v-model="connection.username"></el-input>
+              <el-input v-model="connection.wsOptions.username"></el-input>
             </el-form-item>
           </el-col>
           <el-col :span="8">
             <el-form-item prop="password" label="Password">
-              <el-input v-model="connection.password"></el-input>
+              <el-input v-model="connection.wsOptions.password"></el-input>
             </el-form-item>
           </el-col>
 
